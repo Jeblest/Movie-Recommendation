@@ -25,13 +25,13 @@ class SimilarContentNN:
         self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2').to(self.device)
 
         # Weights for Movies: overview, genres, keywords, content_category.
-        self.m_w_overview = 0.5
+        self.m_w_overview = 0.4
         self.m_w_genres = 0.3
-        self.m_w_keywords = 0.1
+        self.m_w_keywords = 0.2
         self.m_w_catg = 0.1
         
         # Weights for TV shows: overview, genres, content_category.
-        self.s_w_overview = 0.5
+        self.s_w_overview = 0.4
         self.s_w_genres = 0.3
         self.s_w_catg = 0.2
 
@@ -105,8 +105,6 @@ class SimilarContentNN:
 
     def _process_movies(self, movies_df):
         """Process movie-specific data and create embeddings."""
-        movies_df['genres'] = movies_df['genres'].apply(lambda x: x.split(", ") if isinstance(x, str) else [])
-        movies_df['keywords'] = movies_df['keywords'].apply(lambda x: x.split(", ") if isinstance(x, str) else [])
         movies_df["genres_text"] = movies_df["genres"].apply(lambda x: " ".join(x * 2))
         movies_df["keywords_text"] = movies_df["keywords"].apply(lambda x: " ".join(x))
         movies_df["catg_text"] = movies_df["content_category"].astype(str)
@@ -116,7 +114,6 @@ class SimilarContentNN:
 
     def _process_tv_shows(self, tv_df):
         """Process TV show-specific data and create embeddings."""
-        tv_df['genres'] = tv_df['genres'].apply(lambda x: x.split(", ") if isinstance(x, str) else [])
         tv_df["genres_text"] = tv_df["genres"].apply(lambda x: " ".join(x * 2))
         tv_df["catg_text"] = tv_df["content_category"].astype(str)
         
@@ -154,6 +151,8 @@ class SimilarContentNN:
     def _combine_embeddings(self, movies_df, tv_df):
         """Combine processed movies and TV shows."""
         unified_df = pd.concat([movies_df, tv_df], ignore_index=True)
+        self.movie_embeddings = np.vstack(movies_df["embedding"].values)
+        self.tv_embeddings = np.vstack(tv_df["embedding"].values)
         self.embeddings_matrix = np.vstack(unified_df["embedding"].values)
         return unified_df.reset_index(drop=True)
 
