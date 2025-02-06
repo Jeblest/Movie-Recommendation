@@ -25,4 +25,6 @@ model/
 *.pkl
 OldVersion/
 Web/
-Datasets/
+data/
+Ideas/
+__pycache__/
